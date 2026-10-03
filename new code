@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreatorSuite AI - Creator Command Center</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        },
+                        glass: 'rgba(17, 24, 39, 0.75)',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px rgba(99, 102, 241, 0.4)' },
+                            '100%': { boxShadow: '0 0 20px rgba(99, 102, 241, 0.8)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Glassmorphism styling */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+    <!-- Header Navbar -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-800/80 px-4 lg:px-8 py-3.5">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            
+            <!-- Logo & Brand -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid font-bold text-white text-xl fa-wand-magic-sparkles"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">
+                        CreatorSuite <span class="text-brand-400 text-xs px-2 py-0.5 rounded-full border border-brand-500/30 bg-brand-500/10 font-semibold tracking-wide uppercase">AI v2.5</span>
+                    </h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">Automated Content Engine & Viral AI Generator</p>
+                </div>
+            </div>
+
+            <!-- Auto-Pilot Toggle & Controls -->
+            <div class="flex items-center space-x-4">
+                <!-- Auto-Pilot Switch -->
+                <div class="flex items-center space-x-3 bg-slate-900/80 px-3.5 py-1.5 rounded-xl border border-slate-800">
+                    <div class="flex flex-col text-right">
+                        <span class="text-xs font-semibold text-slate-200 flex items-center gap-1.5 justify-end">
+                            <span id="autoPilotPulse" class="w-2 h-2 rounded-full bg-slate-500"></span>
+                            Auto Engine
+                        </span>
+                        <span id="autoPilotStatus" class="text-[10px] text-slate-400">Disabled</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="autoPilotToggle" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+                    </label>
+                </div>
+
+                <!-- API Key Config Button -->
+                <button onclick="toggleKeyModal()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition" title="Gemini API Settings">
+                    <i class="fa-solid fa-key"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
+
+        <!-- Stats Bar -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="glass-panel p-4 rounded-2xl flex items-center justify-between border-l-4 border-l-indigo-500">
+                <div>
+                    <p class="text-xs text-slate-400 font-medium">Total Ideas Generated</p>
+                    <h3 id="statTotal" class="text-2xl font-bold text-slate-100 mt-1">0</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                    <i class="fa-solid fa-lightbulb text-lg"></i>
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-2xl flex items-center justify-between border-l-4 border-l-emerald-500">
+                <div>
+                    <p class="text-xs text-slate-400 font-medium">Approved Content</p>
+                    <h3 id="statApproved" class="text-2xl font-bold text-emerald-400 mt-1">0</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                    <i class="fa-solid fa-circle-check text-lg"></i>
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-2xl flex items-center justify-between border-l-4 border-l-amber-500">
+                <div>
+                    <p class="text-xs text-slate-400 font-medium">Avg Viral Potential</p>
+                    <h3 id="statAvgScore" class="text-2xl font-bold text-amber-400 mt-1">0%</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                    <i class="fa-solid fa-fire text-lg"></i>
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-2xl flex items-center justify-between border-l-4 border-l-purple-500">
+                <div>
+                    <p class="text-xs text-slate-400 font-medium">Active Niche</p>
+                    <h3 id="statActiveNiche" class="text-2xl font-bold text-purple-300 mt-1">All</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                    <i class="fa-solid fa-layer-group text-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instant Generator Section -->
+        <section class="glass-panel p-6 rounded-2xl relative overflow-hidden">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-bolt text-brand-400"></i> Instant AI Content Generator
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Generate high-converting hook ideas, detailed video scripts, and viral outlines on demand.</p>
+                </div>
+                
+                <!-- Quick Topic Templates -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+                    <span class="text-xs text-slate-400 whitespace-nowrap">Niches:</span>
+                    <button onclick="selectNichePreset('Tech')" class="niche-btn px-3 py-1 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">🚀 Tech</button>
+                    <button onclick="selectNichePreset('Finance')" class="niche-btn px-3 py-1 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">💰 Finance</button>
+                    <button onclick="selectNichePreset('Lifestyle')" class="niche-btn px-3 py-1 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">🌿 Lifestyle</button>
+                    <button onclick="selectNichePreset('Productivity')" class="niche-btn px-3 py-1 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">⚡ Productivity</button>
+                </div>
+            </div>
+
+            <form id="generatorForm" onsubmit="handleManualGenerate(event)" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Target Niche</label>
+                        <select id="genNiche" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-brand-500">
+                            <option value="Tech">🚀 Tech & AI Innovations</option>
+                            <option value="Finance">💰 Personal Finance & Investing</option>
+                            <option value="Lifestyle">🌿 Health, Mindset & Lifestyle</option>
+                            <option value="Productivity">⚡ Workflows & Productivity</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Content Format</label>
+                        <select id="genFormat" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-brand-500">
+                            <option value="Short-form Video">📱 Short-form Reel / TikTok (30-60s)</option>
+                            <option value="Long-form Video">🎬 Youtube Video Outline (5-10m)</option>
+                            <option value="X Thread">🧵 Twitter / X Viral Thread</option>
+                            <option value="LinkedIn Post">💼 LinkedIn Insight Post</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Custom Prompt / Keyword (Optional)</label>
+                        <input type="text" id="genPrompt" placeholder="e.g. AI tools for coders, 2026 passive income..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end space-x-3 pt-2">
+                    <button type="button" onclick="generateBatch(3)" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group"></i> Generate Batch (x3)
+                    </button>
+                    <button type="submit" id="genSubmitBtn" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white text-xs font-semibold shadow-lg shadow-indigo-500/25 transition flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Fresh Content
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Live Feed Toolbar & Filter Section -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            <!-- Filters & Views -->
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs font-semibold text-slate-400 mr-2">Filter Feed:</span>
+                
+                <!-- Status Filter -->
+                <select id="filterStatus" onchange="renderFeed()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-brand-500">
+                    <option value="all">All Statuses</option>
+                    <option value="pending">⏳ Pending Review</option>
+                    <option value="approved">✅ Approved</option>
+                    <option value="rejected">❌ Rejected</option>
+                </select>
+
+                <!-- Niche Filter -->
+                <select id="filterNiche" onchange="renderFeed()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-brand-500">
+                    <option value="all">All Niches</option>
+                    <option value="Tech">🚀 Tech</option>
+                    <option value="Finance">💰 Finance</option>
+                    <option value="Lifestyle">🌿 Lifestyle</option>
+                    <option value="Productivity">⚡ Productivity</option>
+                </select>
+
+                <!-- Search Input -->
+                <div class="relative">
+                    <input type="text" id="filterSearch" oninput="renderFeed()" placeholder="Search hooks or topics..." class="bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-brand-500 w-44 md:w-56">
+                    <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-500 text-xs"></i>
+                </div>
+            </div>
+
+            <!-- Bulk Operations & Clear Controls -->
+            <div class="flex items-center space-x-2">
+                <button onclick="clearAllItems()" class="px-3 py-1.5 text-xs rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-800/50 transition">
+                    <i class="fa-solid fa-trash-can mr-1"></i> Clear Feed
+                </button>
+            </div>
+        </div>
+
+        <!-- Content Feed Cards Grid -->
+        <div id="contentFeed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- Dynamic Feed Items will render here -->
+        </div>
+
+        <!-- Empty Feed State -->
+        <div id="emptyFeedState" class="hidden glass-panel rounded-2xl p-12 text-center space-y-4">
+            <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto text-slate-500 text-2xl">
+                <i class="fa-solid fa-inbox"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-semibold text-slate-200">No Content Items Found</h3>
+                <p class="text-xs text-slate-400 max-w-sm mx-auto mt-1">Try resetting your filter, turning on the Auto Content Engine, or generating fresh content ideas above.</p>
+            </div>
+            <button onclick="resetFilters()" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-medium transition">
+                Reset Filters
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Content Detail / Script Editor Modal -->
+    <div id="contentModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="glass-panel w-full max-w-2xl rounded-2xl border border-slate-700/80 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
+            
+            <!-- Modal Header -->
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <span id="modalNicheBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">Niche</span>
+                    <h3 class="text-sm font-bold text-slate-200">Script & Strategy Studio</h3>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content Body -->
+            <div class="p-6 space-y-5 overflow-y-auto">
+                <!-- Editable Hook -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Viral Hook Title</label>
+                    <input type="text" id="modalHookInput" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm font-semibold text-slate-100 focus:outline-none focus:border-brand-500">
+                </div>
+
+                <!-- Strategy & Metadata Details -->
+                <div class="grid grid-cols-2 gap-4 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80 text-xs">
+                    <div>
+                        <span class="text-slate-400">Viral Potential Score:</span>
+                        <div id="modalScore" class="font-bold text-amber-400 mt-0.5">92/100</div>
+                    </div>
+                    <div>
+                        <span class="text-slate-400">Target Visual Style:</span>
+                        <div id="modalVisual" class="font-medium text-slate-300 mt-0.5">Fast-paced cuts</div>
+                    </div>
+                </div>
+
+                <!-- Full Script Editor -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-semibold text-slate-400">Full Video Script / Content Text</label>
+                        <button onclick="copyModalScript()" class="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1">
+                            <i class="fa-regular fa-copy"></i> Copy Script
+                        </button>
+                    </div>
+                    <textarea id="modalScriptInput" rows="7" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-brand-500 font-mono leading-relaxed"></textarea>
+                </div>
+            </div>
+
+            <!-- Modal Footer Controls -->
+            <div class="p-4 border-t border-slate-800 bg-slate-900/40 flex items-center justify-between">
+                <button onclick="deleteCurrentModalItem()" class="px-3.5 py-2 text-xs font-medium text-red-400 hover:text-red-300 bg-red-950/30 hover:bg-red-950/60 rounded-xl border border-red-800/40 transition">
+                    <i class="fa-solid fa-trash mr-1"></i> Delete
+                </button>
+                <div class="flex items-center space-x-2">
+                    <button onclick="saveModalChanges()" class="px-4 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-500 rounded-xl shadow transition">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gemini API Key Modal -->
+    <div id="keyModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="glass-panel w-full max-w-md rounded-2xl border border-slate-700/80 p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-key text-amber-400"></i> Gemini API Configuration
+                </h3>
+                <button onclick="toggleKeyModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <p class="text-xs text-slate-400">
+                You can optionally save your custom Gemini API key to enable live online generative content requests. If left blank, CreatorSuite AI automatically runs using high-performance intelligent generator algorithms.
+            </p>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">API Key</label>
+                <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-brand-500">
+            </div>
+
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="toggleKeyModal()" class="px-4 py-2 rounded-xl text-xs bg-slate-800 hover:bg-slate-700 text-slate-300">Cancel</button>
+                <button onclick="saveApiKey()" class="px-4 py-2 rounded-xl text-xs bg-brand-600 hover:bg-brand-500 text-white font-semibold">Save Key</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Banner Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        // Default Mock Viral Database Templates
+        const SEED_TEMPLATES = {
+            Tech: [
+                {
+                    hook: "Stop Using ChatGPT Until You Watch This (New 2026 AI Workflow)",
+                    format: "Short-form Reel",
+                    score: 96,
+                    visual: "Fast screen recordings showcasing unexpected AI features.",
+                    script: "HOOK: Stop using ChatGPT until you learn this hidden workflow. \n\nBODY:\n1. Open your model settings and enable context memory.\n2. Use multi-modal image rendering for automated UI layout generation.\n3. Feed your database schema directly into the prompt.\n\nCALL TO ACTION: Save this reel before it gets taken down!"
+                },
+                {
+                    hook: "This Invisible Tech Upgrade Tripled My Coding Speed",
+                    format: "LinkedIn Post",
+                    score: 91,
+                    visual: "High-contrast clean minimalist IDE layout.",
+                    script: "Most developers waste 40% of their day debugging standard boilerplate code. Here is how autonomous code agents changed everything for my workspace setup in 2026..."
+                }
+            ],
+            Finance: [
+                {
+                    hook: "How to Build a $1,000/Month Passive Portfolio Starting With $100",
+                    format: "Short-form Reel",
+                    score: 98,
+                    visual: "On-screen animated graphics of compounding interest curves.",
+                    script: "HOOK: Want $1,000 in monthly passive income? Here is the exact math breakdown.\n\nSTEP 1: High-yield dividend ETFs with automatic reinvestment.\nSTEP 2: Treasury yields locked at peak rates.\nSTEP 3: Automate $10 daily micro-deposits."
+                },
+                {
+                    hook: "5 Financial Rules You Must Follow Before Age 30",
+                    format: "X Thread",
+                    score: 89,
+                    visual: "Bullet list with crisp typography.",
+                    script: "1/ Rule 1: Never spend before investing.\n2/ Rule 2: Keep 6 months of emergency capital in high-interest liquidity vaults.\n3/ Rule 3: Diversify active skills, not just assets."
+                }
+            ],
+            Lifestyle: [
+                {
+                    hook: "The 5 AM Routine That Secretly Ruined My Productivity",
+                    format: "Short-form Reel",
+                    score: 94,
+                    visual: "Cinematic dark moody morning aesthetic.",
+                    script: "HOOK: Everyone told me waking up at 5 AM was the key to success. They were wrong.\n\nBODY: Circadian alignment matters more than arbitrary clock times. Here is how switching to sleep-cycle scheduling doubled my energy..."
+                }
+            ],
+            Productivity: [
+                {
+                    hook: "I Replaced My Entire To-Do List With This Single Notion System",
+                    format: "Youtube Video",
+                    score: 95,
+                    visual: "Sleek dark-mode dashboard setup demo.",
+                    script: "Traditional task lists cause decision fatigue. Instead, use priority-bucket time blocking with dynamic energy tags..."
+                }
+            ]
+        };
+
+        // Application State
+        let contentItems = [];
+        let autoPilotInterval = null;
+        let activeEditId = null;
+
+        // Initialize Application
+        window.onload = function() {
+            loadSavedData();
+            renderFeed();
+            updateStats();
+
+            // Load saved API Key if exists
+            const savedKey = localStorage.getItem('cs_gemini_api_key');
+            if(savedKey) {
+                document.getElementById('geminiApiKeyInput').value = savedKey;
+            }
+
+            // Restore Auto-Pilot toggle state
+            const isAuto = localStorage.getItem('cs_autopilot') === 'true';
+            const toggle = document.getElementById('autoPilotToggle');
+            toggle.checked = isAuto;
+            if(isAuto) {
+                startAutoPilot();
+            }
+
+            // Attach toggle event listener
+            toggle.addEventListener('change', function(e) {
+                if(e.target.checked) {
+                    localStorage.setItem('cs_autopilot', 'true');
+                    startAutoPilot();
