@@ -1,3 +1,26 @@
+name: CreatorSuite AI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build-site:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create index.html
+        shell: bash
+        run: |
+          cat > index.html <<'CREATORSUITE_HTML'
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -480,3 +503,19 @@
                 if(e.target.checked) {
                     localStorage.setItem('cs_autopilot', 'true');
                     startAutoPilot();
+CREATORSUITE_HTML
+
+      - name: Commit generated website
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add index.html
+
+          if git diff --cached --quiet; then
+            echo "No changes to index.html"
+          else
+            git commit -m "Build CreatorSuite AI website"
+            git push
+          fi
