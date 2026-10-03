@@ -1,0 +1,29 @@
+name: Auto Creator Content Scraper
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  scrape-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: Install dependencies
+        run: |
+          pip install google-generativeai supabase requests
+          
+      - name: Run Scraper Script
+        env:
+          SUPABASE_URL: ${{ https://supabase.com/dashboard/project/pmqjomnfalmqmdpwytgq/settings/api-keys }}
+          SUPABASE_KEY: ${{ sb_secret_pHcXpkPQkmqdiYVJOJTWeg_WUHOtUFO }}
+          GEMINI_API_KEY: ${{ AQ.Ab8RN6JPIFuAHIHIUpeFWuPYRSa-9VStlk7s5pURONM_YlumJw }}
+        run: python scraper.py
